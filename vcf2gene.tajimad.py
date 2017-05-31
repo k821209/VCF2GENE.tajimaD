@@ -54,11 +54,14 @@ def calcPi(matrix):
         counts = Counter(allele_list)
         n1     = sum(counts.values())
         
+        #if 'N' in counts.keys():
+        #    if float(counts['N']) / n1 > 0.6:
+        #        continue
         # Correct count if there are missing data.
         # Ignore N counts
+        
         cor_counts = [counts[x] for x in counts.keys() if x != 'N']
-        n = sum(cor_counts)
-    
+        n          = sum(cor_counts)
         if len(cor_counts) > 1:
             num_sites += 1
 
@@ -84,11 +87,15 @@ def get_tajimaD(test_mat):
         tw      = S / a1
         var     = (e1 * S) + ((e2 * S) * (S - 1.0))
         TajimaD = (pi - tw) / (var)**(0.5)
-        return TajimaD
-    except : return None
+        return TajimaD,pi
+    except : return None, None
 
 dic = {'genename' : [],
+       'Pi'       : [],
        'TajimaD'  : []}
+
+
+#genenamelist = ['AT3G59880.TAIR10']
 for genename in tqdm(list(genenamelist)):
     try:
         if math.isnan(genename) == True:
@@ -97,12 +104,14 @@ for genename in tqdm(list(genenamelist)):
     test_mat = get_matrix(genename)
     if test_mat == None:
         dic['genename'].append(genename)
+        dic['Pi'].append(None)
         dic['TajimaD'].append(None)
     else:
-#        print test_mat
-        tajimaD  = get_tajimaD(test_mat)
+        
+        tajimaD,pi  = get_tajimaD(test_mat)
         dic['genename'].append(genename)
         dic['TajimaD'].append(tajimaD)
+        dic['Pi'].append(pi)
 
 pd.DataFrame(dic).to_csv('test.out',sep='\t')
 
